@@ -1,6 +1,5 @@
 import me.ivmg.telegram.bot
 import me.ivmg.telegram.dispatch
-import me.ivmg.telegram.dispatcher.command
 import me.ivmg.telegram.dispatcher.text
 
 class TelegramBot
@@ -15,12 +14,14 @@ class TelegramBot
                     when (args[0]){
                         "/start" -> bot.sendMessage(chatId = update.message!!.chat.id, text = "Приветствую, мой друг")
                         "!request" -> {
-                            val pull_request = args[1]
+                            val pullRequest = args[1]
                             bot.sendMessage(chatId = update.message!!.chat.id, text = "https://aaa.com")
+                        }
+                        "SetToken" -> {
+                            // тут нужно сделать что-то вроде сохранения токена с netangels в бд(нужно создать бд)
                         }
                         else -> bot.sendMessage(chatId = update.message!!.chat.id, text = "Не знаю")
                     }
-                    bot.sendMessage(chatId = update.message!!.chat.id, text = text)
                 }
             }
         }
