@@ -7,7 +7,7 @@ class TelegramBot
     fun main(args: Array<String>) {
         val bot = bot {
             token = "1307302342:AAF8z1THWcnkv_ZZ5vtlwROuMsnU8nZz7fU"
-            val GitActions = GitHubInteraction()
+            val gitActions = GitHubInteraction()
             dispatch {
                 text { bot, update ->
                     println(update)
@@ -20,7 +20,7 @@ class TelegramBot
                             var answer = "Что-то пошло не так..."
                             try
                             {
-                                GitActions.downloadPullRequest(pullRequest)
+                                gitActions.downloadPullRequest(pullRequest)
                                 answer = "url"
                             }
                             catch (e : Exception)
