@@ -8,7 +8,7 @@ class TelegramBot
             token = "1307302342:AAF8z1THWcnkv_ZZ5vtlwROuMsnU8nZz7fU"
             dispatch {
                 text { bot, update ->
-                    print(update)
+                    println(update)
                     val text = update.message?.text ?: "Error"
                     val args = text.split(" ")
                     when (args[0]){
