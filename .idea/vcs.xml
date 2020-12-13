@@ -2,5 +2,13 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/gitCopies" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/gitCopies/Dimas99_3" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/gitCopies/Dimus993" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/gitCopies/Dimus99_1" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/gitCopies/Dimus99_2" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/gitCopies/Dimus99_3" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/gitCopies/Dimus99_3/telegramPullRequestBot" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/telegramPullRequestBot" vcs="Git" />
   </component>
 </project>
