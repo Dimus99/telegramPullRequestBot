@@ -4,7 +4,9 @@ import me.ivmg.telegram.dispatcher.text
 import java.lang.Exception
 
 class TelegramBot
+
     fun main(args: Array<String>) {
+
         val bot = bot {
             token = "1307302342:AAF8z1THWcnkv_ZZ5vtlwROuMsnU8nZz7fU"
             val gitActions = GitHubInteraction()
