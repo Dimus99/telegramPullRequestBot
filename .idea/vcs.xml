@@ -9,6 +9,7 @@
     <mapping directory="$PROJECT_DIR$/gitCopies/Dimus99_2" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/gitCopies/Dimus99_3" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/gitCopies/Dimus99_3/telegramPullRequestBot" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/gitCopies/Dimus99_6" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/telegramPullRequestBot" vcs="Git" />
   </component>
 </project>

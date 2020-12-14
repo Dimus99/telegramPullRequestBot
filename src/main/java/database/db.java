@@ -1,20 +1,14 @@
+package database;
 import java.sql.*;
 
-
-
-
-
-
-
-
-public class DataBase {
+public class db {
     static Connection conn;
     String databaseName;
-
+    //db base = new db("./lib/users.db");
 
     //Конструктор с  подключением к бд
     //В переменной path должно находится расположние файла с бд (имя файла и самой таблицы должны сопадать)
-    public DataBase(String path) throws SQLException {
+    public db(String path) throws SQLException {
         databaseName = path.split("\\W+")[path.split("\\W+").length - 2];
 
         try {
