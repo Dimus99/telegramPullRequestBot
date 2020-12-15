@@ -37,7 +37,8 @@ public class DataBase {
         try {
             Statement statement = conn.createStatement();
             statement.executeUpdate(query);
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             System.out.println(e.getMessage());
         }
         //Если запись с таки id уже существует, изменяем ее
