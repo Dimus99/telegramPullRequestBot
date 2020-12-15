@@ -12,6 +12,8 @@ public class DataBase {
     String databaseName;
 
 
+
+
     //Конструктор с  подключением к бд
     //В переменной path должно находится расположние файла с бд (имя файла и самой таблицы должны сопадать)
     public DataBase(String path) throws SQLException {

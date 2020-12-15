@@ -5,7 +5,7 @@ import java.lang.Exception
 import database.db;
 
 
-class TelegramBot constructor(db: db){
+class TelegramBot(val dataBase: DataBase){
 
     fun Start() {
 
@@ -32,7 +32,7 @@ class TelegramBot constructor(db: db){
                         }
                         "!setToken" -> {
                             AddToDataBase(update.message!!.chat.id.toString(), args[1])
-                            // тут нужно сделать что-то вроде сохранения токена с netangels в бд(нужно создать бд)
+
                         }
                         else -> bot.sendMessage(chatId = update.message!!.chat.id, text = "Не знаю")
                     }
@@ -44,14 +44,12 @@ class TelegramBot constructor(db: db){
 
     private fun AddToDataBase(id: String, token: String)
     {
-        //db.AddData(id, token);
-        //выдает ошибку
+        dataBase.AddData(id, token)
     }
 
-    private fun GetToken(id: String)
+    private  fun GetToken(id: String): String
     {
-        //db.GetTokenById(id);
-        //тоже выдает ошибку
+        return dataBase.GetTokenById(id);
     }
 
 
