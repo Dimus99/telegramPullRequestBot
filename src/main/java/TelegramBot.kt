@@ -2,14 +2,11 @@ import me.ivmg.telegram.bot
 import me.ivmg.telegram.dispatch
 import me.ivmg.telegram.dispatcher.text
 import java.lang.Exception
-import database.db;
 
 
-class TelegramBot(val dataBase: DataBase){
-
+class TelegramBot(private val dataBase: DataBase){
 
     fun Start() {
-
         val bot = bot {
             token = "1307302342:AAF8z1THWcnkv_ZZ5vtlwROuMsnU8nZz7fU"
             //val gitActions = GitHubInteraction()

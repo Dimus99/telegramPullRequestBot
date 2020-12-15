@@ -1,5 +1,3 @@
-import database.*;
-
 import java.sql.SQLException;
 
 
@@ -8,8 +6,5 @@ public class program {
         DataBase database = new DataBase("./lib/users.db");
         TelegramBot bot = new TelegramBot(database);
         bot.Start();
-
-        
-
     }
 }

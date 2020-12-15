@@ -1,18 +1,9 @@
 import java.sql.*;
 
 
-
-
-
-
-
-
 public class DataBase {
     static Connection conn;
     String databaseName;
-
-
-
 
     //Конструктор с  подключением к бд
     //В переменной path должно находится расположние файла с бд (имя файла и самой таблицы должны сопадать)
@@ -29,7 +20,6 @@ public class DataBase {
             System.out.println(e.getMessage());
         }
     }
-
 
     //Добавляем запись в бд
     //Этот же метод используется для изменения уже существующих данных
@@ -84,7 +74,5 @@ public class DataBase {
         }
 
         return res;
-
-
     }
 }
