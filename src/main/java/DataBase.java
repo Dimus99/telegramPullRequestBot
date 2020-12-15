@@ -13,9 +13,15 @@ public class DataBase {
         databaseName = path.split("\\W+")[path.split("\\W+").length - 2];
 
         try {
+            System.out.println(path);
+            System.out.println();
+            System.out.println("\n\n\n----\n");
             Class.forName("org.sqlite.JDBC");
+            System.out.println("\n1111----\n");
             path = "jdbc:sqlite:".concat(path);
+            System.out.println("\n22222----\n");
             conn = DriverManager.getConnection(path);
+            System.out.println("\n3333----\n");
             System.out.println("successfully connected to \'" + databaseName + "\'");
 
 

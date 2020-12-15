@@ -8,7 +8,7 @@ class TelegramBot(private val dataBase: DataBase){
 
     fun Start() {
         val bot = bot {
-            token = "1307302342:AAF8z1THWcnkv_ZZ5vtlwROuMsnU8nZz7fU"
+            token = "1307302342:AAEctqW04p3Tam2Zq6Eu2ThGOZ8B3IhxalY"
             //val gitActions = GitHubInteraction()
             val gitActions = GitHubInteraction()
 
@@ -31,7 +31,14 @@ class TelegramBot(private val dataBase: DataBase){
                             bot.sendMessage(chatId = update.message!!.chat.id, text = answer)
                         }
                         "!setToken" -> {
-                            AddToDataBase(update.message!!.chat.id.toString(), args[1])
+                            try {
+                                bot.sendMessage(chatId = update.message!!.chat.id, text = "Ожидайте...")
+                                AddToDataBase(update.message!!.chat.id.toString(), args[1])
+                                bot.sendMessage(chatId = update.message!!.chat.id, text = "ваш токен из бд" + GetToken(update.message!!.chat.id.toString())).toString()
+                            }
+                            catch (e : Exception){
+                                e.printStackTrace()
+                            }
 
                         }
                         else -> bot.sendMessage(chatId = update.message!!.chat.id, text = "Не знаю")
