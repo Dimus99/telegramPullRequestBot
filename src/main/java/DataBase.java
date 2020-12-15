@@ -67,7 +67,8 @@ public class DataBase {
 
         //System.out.println(query);
         //System.out.println(conn);
-        try {
+        try
+        {
             Statement statement = conn.createStatement();
             resSet = statement.executeQuery(query);
             //System.out.println(resSet.getString("token"));
