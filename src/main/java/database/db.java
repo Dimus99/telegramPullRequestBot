@@ -1,34 +1,25 @@
+package database;
 import java.sql.*;
 
-public class DataBase {
+public class db {
     static Connection conn;
     String databaseName;
-
-
-
+    //db base = new db("./lib/users.db");
 
     //Конструктор с  подключением к бд
     //В переменной path должно находится расположние файла с бд (имя файла и самой таблицы должны сопадать)
-    public DataBase(String path) throws SQLException {
+    public db(String path) throws SQLException {
         databaseName = path.split("\\W+")[path.split("\\W+").length - 2];
 
         try {
-            System.out.println(path);
-            System.out.println();
-            System.out.println("\n\n\n----\n");
             Class.forName("org.sqlite.JDBC");
-            System.out.println("\n1111----\n");
             path = "jdbc:sqlite:".concat(path);
-            System.out.println("\n22222----\n");
             conn = DriverManager.getConnection(path);
-            System.out.println("\n3333----\n");
             System.out.println("successfully connected to \'" + databaseName + "\'");
-
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-
     }
 
 
@@ -43,8 +34,7 @@ public class DataBase {
         try {
             Statement statement = conn.createStatement();
             statement.executeUpdate(query);
-        } catch (Exception e)
-        {
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
         //Если запись с таки id уже существует, изменяем ее
@@ -70,15 +60,12 @@ public class DataBase {
         String res = null;
 
         String query =
-                "SELECT token FROM " + databaseName + " WHERE id = \"" + id + "\";";
+                "SELECT token FROM " + databaseName + " WHERE id = " + id + ";";
 
-        //System.out.println(query);
-        //System.out.println(conn);
-        try
-        {
+
+        try {
             Statement statement = conn.createStatement();
             resSet = statement.executeQuery(query);
-            //System.out.println(resSet.getString("token"));
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
