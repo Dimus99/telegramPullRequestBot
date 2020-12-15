@@ -7,11 +7,14 @@ import database.db;
 
 class TelegramBot(val dataBase: DataBase){
 
+
     fun Start() {
 
         val bot = bot {
             token = "1307302342:AAF8z1THWcnkv_ZZ5vtlwROuMsnU8nZz7fU"
+            //val gitActions = GitHubInteraction()
             val gitActions = GitHubInteraction()
+
             dispatch {
                 text { bot, update ->
                     println(update)
