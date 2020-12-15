@@ -1,12 +1,5 @@
 import java.sql.*;
 
-
-
-
-
-
-
-
 public class DataBase {
     static Connection conn;
     String databaseName;
@@ -25,9 +18,11 @@ public class DataBase {
             conn = DriverManager.getConnection(path);
             System.out.println("successfully connected to \'" + databaseName + "\'");
 
+
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+
     }
 
 
@@ -68,12 +63,14 @@ public class DataBase {
         String res = null;
 
         String query =
-                "SELECT token FROM " + databaseName + " WHERE id = " + id + ";";
+                "SELECT token FROM " + databaseName + " WHERE id = \"" + id + "\";";
 
-
+        //System.out.println(query);
+        //System.out.println(conn);
         try {
             Statement statement = conn.createStatement();
             resSet = statement.executeQuery(query);
+            //System.out.println(resSet.getString("token"));
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
