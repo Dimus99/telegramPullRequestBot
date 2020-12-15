@@ -1,10 +1,9 @@
-
 import java.io.File
 import java.io.IOException
 
 
 class GitHubInteraction {
-    fun downloadPullRequest(urlPullRequest : String){
+    fun downloadPullRequest(urlPullRequest:String){
         //разделяем ссылку pull request на ссылку на проект и номер пулл реквеста
         val urlSplit = urlPullRequest.split("/")
         val urlProject = urlSplit.take(5).joinToString(separator = "/")
@@ -17,6 +16,7 @@ class GitHubInteraction {
         // этот костыль связан с неудобством нормально создать директорию
         for (command in listOf(command1, command2)) {
             try {
+                println("команда$command")
                 val proc = Runtime.getRuntime().exec(command,null, File(directoryForGitProject))
                 proc.waitFor()
                 proc.destroy()

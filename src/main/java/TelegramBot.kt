@@ -4,12 +4,10 @@ import me.ivmg.telegram.dispatcher.text
 import java.lang.Exception
 
 
-class TelegramBot(private val dataBase: DataBase){
-
-    fun Start() {
+class TelegramBot(private val dataBase:DataBase){
+    fun start() {
         val bot = bot {
-            token = "1307302342:AAEctqW04p3Tam2Zq6Eu2ThGOZ8B3IhxalY"
-            //val gitActions = GitHubInteraction()
+            token = "1307302342:AAHm4HMSA6CZ-y2Dqquu1955ew8dfrIZFTA"
             val gitActions = GitHubInteraction()
 
             dispatch {
@@ -20,26 +18,35 @@ class TelegramBot(private val dataBase: DataBase){
                     when (args[0]) { // надо добавить трай кетчи на все отправки сообщений, вдруг интернет пропадет :(
                         "/start" -> bot.sendMessage(chatId = update.message!!.chat.id, text = "Приветствую, мой друг")
                         "!request" -> {
-                            val pullRequest = args[1]
-                            var answer = "Что-то пошло не так..."
-                            try {
-                                gitActions.downloadPullRequest(pullRequest)
-                                answer = "url"
-                            } catch (e: Exception) {
-                                e.printStackTrace()
+                            if (args.count() == 1){
+                                bot.sendMessage(chatId = update.message!!.chat.id, text = "где ссылка на pull request?")
                             }
-                            bot.sendMessage(chatId = update.message!!.chat.id, text = answer)
+                            else {
+                                val pullRequest = args[1]
+                                var answer = "Что-то пошло не так..."
+                                try {
+                                    gitActions.downloadPullRequest(pullRequest)
+                                    answer = "url"
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                                bot.sendMessage(chatId = update.message!!.chat.id, text = answer)
+                            }
                         }
                         "!setToken" -> {
-                            try {
-                                bot.sendMessage(chatId = update.message!!.chat.id, text = "Ожидайте...")
-                                AddToDataBase(update.message!!.chat.id.toString(), args[1])
-                                bot.sendMessage(chatId = update.message!!.chat.id, text = "ваш токен из бд" + GetToken(update.message!!.chat.id.toString())).toString()
+                            if (args.count() == 1){
+                                bot.sendMessage(chatId = update.message!!.chat.id, text = "где токен?")
                             }
-                            catch (e : Exception){
-                                e.printStackTrace()
+                            else {
+                                try {
+                                    bot.sendMessage(chatId = update.message!!.chat.id, text = "Ожидайте...")
+                                    addToDataBase(update.message!!.chat.id.toString(), args[1])
+                                    bot.sendMessage(chatId = update.message!!.chat.id, text = "ваш токен из бд\n" + getToken(update.message!!.chat.id.toString())).toString()
+                                } catch (e: Exception) {
+                                    bot.sendMessage(chatId = update.message!!.chat.id, text = "ошибка с установкой токена")
+                                    e.printStackTrace()
+                                }
                             }
-
                         }
                         else -> bot.sendMessage(chatId = update.message!!.chat.id, text = "Не знаю")
                     }
@@ -49,15 +56,13 @@ class TelegramBot(private val dataBase: DataBase){
         bot.startPolling()
     }
 
-    private fun AddToDataBase(id: String, token: String)
+    private fun addToDataBase(id: String, token: String)
     {
         dataBase.AddData(id, token)
     }
 
-    private  fun GetToken(id: String): String
+    private  fun getToken(id: String): String
     {
-        return dataBase.GetTokenById(id);
+        return dataBase.GetTokenById(id)
     }
-
-
 }

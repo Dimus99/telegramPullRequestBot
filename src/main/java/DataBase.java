@@ -5,41 +5,29 @@ public class DataBase {
     String databaseName;
 
 
-
-
     //Конструктор с  подключением к бд
     //В переменной path должно находится расположние файла с бд (имя файла и самой таблицы должны сопадать)
-    public DataBase(String path) throws SQLException {
+    public DataBase(String path) {
         databaseName = path.split("\\W+")[path.split("\\W+").length - 2];
 
         try {
-            System.out.println(path);
-            System.out.println();
-            System.out.println("\n\n\n----\n");
             Class.forName("org.sqlite.JDBC");
-            System.out.println("\n1111----\n");
             path = "jdbc:sqlite:".concat(path);
-            System.out.println("\n22222----\n");
             conn = DriverManager.getConnection(path);
-            System.out.println("\n3333----\n");
-            System.out.println("successfully connected to \'" + databaseName + "\'");
-
-
+            System.out.println("successfully connected to '" + databaseName + "'");
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-
     }
 
-
-    //Добавляем запись в бд
-    //Этот же метод используется для изменения уже существующих данных
+    // Добавляем запись в бд
+    // Этот же метод используется для изменения уже существующих данных
     public void AddData(String id, String token) throws SQLException {
-        //Создаем ввод команды SQLite
+        // Создаем ввод команды SQLite
         String query =
                 "INSERT INTO " + databaseName + " (%s, %s) ".formatted("id", "token") +
                         "VALUES ('%s', '%s');".formatted(id, token);
-        //Пробуем создать новую запись
+        // Пробуем создать новую запись
         try {
             Statement statement = conn.createStatement();
             statement.executeUpdate(query);
@@ -47,7 +35,7 @@ public class DataBase {
         {
             System.out.println(e.getMessage());
         }
-        //Если запись с таки id уже существует, изменяем ее
+        // Если запись с таки id уже существует, изменяем ее
         finally {
             query =
                     "UPDATE " + databaseName + " " +
@@ -57,13 +45,10 @@ public class DataBase {
             statement.executeUpdate(query);
         }
 
-
         System.out.println("data added");
-
-
     }
 
-    //По названию и так понятен функционал
+    // По названию и так понятен функционал
     public String GetTokenById(String id) throws SQLException {
 
         ResultSet resSet = null;
@@ -72,13 +57,10 @@ public class DataBase {
         String query =
                 "SELECT token FROM " + databaseName + " WHERE id = \"" + id + "\";";
 
-        //System.out.println(query);
-        //System.out.println(conn);
         try
         {
             Statement statement = conn.createStatement();
             resSet = statement.executeQuery(query);
-            //System.out.println(resSet.getString("token"));
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -89,7 +71,5 @@ public class DataBase {
         }
 
         return res;
-
-
     }
 }
