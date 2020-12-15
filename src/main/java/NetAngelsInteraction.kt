@@ -1,4 +1,9 @@
-class NetAngelsInteraction {
+class etAngelsInteraction {
+    fun GetToken(apiKey: String){
+        val getTokenRequest = "curl -XPOST https://panel.netangels.ru/api/gateway/token/ \\\n -d api_key=$apiKey"
+
+    }
+
     fun Connect(){
         //реализовать подсоединение к сайту netangels через апи, для этого есть токен
     }
