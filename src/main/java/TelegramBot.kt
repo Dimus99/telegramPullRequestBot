@@ -7,7 +7,7 @@ import java.lang.Exception
 class TelegramBot(private val dataBase:DataBase){
     fun start() {
         val bot = bot {
-            token = "1307302342:AAHm4HMSA6CZ-y2Dqquu1955ew8dfrIZFTA"
+            token = Config().token
             val gitActions = GitHubInteraction()
 
             dispatch {

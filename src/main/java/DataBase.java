@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.util.Objects;
 
 public class DataBase {
     static Connection conn;
@@ -66,7 +67,7 @@ public class DataBase {
             System.out.println(e.getMessage());
         }
 
-        while (resSet.next()) {
+        while (Objects.requireNonNull(resSet).next()) {
             res = resSet.getString("token");
         }
 
