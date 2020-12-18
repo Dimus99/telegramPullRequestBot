@@ -58,11 +58,11 @@ class TelegramBot(private val dataBase:DataBase){
 
     private fun addToDataBase(id: String, token: String)
     {
-        dataBase.AddData(id, token)
+        dataBase.addData(id, token)
     }
 
     private  fun getToken(id: String): String
     {
-        return dataBase.GetTokenById(id)
+        return dataBase.getTokenById(id)
     }
 }

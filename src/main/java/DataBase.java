@@ -22,7 +22,7 @@ public class DataBase {
 
     // Добавляем запись в бд
     // Этот же метод используется для изменения уже существующих данных
-    public void AddData(String id, String token) throws SQLException {
+    public void addData(String id, String token) throws SQLException {
         // Создаем ввод команды SQLite
         String query =
                 "INSERT INTO " + databaseName + " (%s, %s) ".formatted("id", "token") +
@@ -49,7 +49,7 @@ public class DataBase {
     }
 
     // По названию и так понятен функционал
-    public String GetTokenById(String id) throws SQLException {
+    public String getTokenById(String id) throws SQLException {
 
         ResultSet resSet = null;
         String res = null;
