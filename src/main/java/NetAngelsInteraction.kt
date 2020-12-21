@@ -35,12 +35,14 @@ class NetAngelsInteraction {
         for (vm in vms){
             val vmObj = vm as JSONObject
             print("vm $vm")
+            val name : String = vmObj["name"] as String
             val host : String = vmObj["hostname"] as String
             val active : String = vmObj["state"] as String
             val ip : String = vmObj["main_ip"] as String
             val id : String = vmObj["id"].toString()
             machines[ip] = mapOf(
-                "Active" to (active=="Active").toString(),
+                "name" to name,
+                "active" to active,
                 "host" to host,
                 "ip" to ip,
                 "id" to id
@@ -73,7 +75,7 @@ class NetAngelsInteraction {
     }
 
 
-    private fun changePassword(token:String, id:String, password:String): Boolean {
+    private fun changePassword(token:String, id:String, password:String): Response {
         val response: Response = khttp.post(
             url = "https://api-ms.netangels.ru/api/v1/cloud/vms/$id/change-password/",
             headers = mapOf("Authorization" to "Bearer $token"),
@@ -81,13 +83,15 @@ class NetAngelsInteraction {
         )
         val obj =response.jsonObject
         print("$response $obj")
-        return response.statusCode == 200
+        return response
     }
 
     fun getLoginAndPassword(token: String, id: String): Map<String, String> {
         val password = "dfgE3HKJ8c0DFj99d" // may edit
-        if (changePassword(token, id, password)) {
+        val response = changePassword(token, id, password)
+        if (response.statusCode == 200) {
             return mapOf(
+                "host" to response.jsonObject["main_ip"].toString(),
                 "login" to "root",
                 "password" to password
             )

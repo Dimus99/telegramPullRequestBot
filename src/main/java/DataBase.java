@@ -65,6 +65,7 @@ public class DataBase {
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
+            return null;
         }
 
         while (Objects.requireNonNull(resSet).next()) {
