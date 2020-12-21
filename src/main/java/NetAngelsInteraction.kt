@@ -18,9 +18,9 @@ class NetAngelsInteraction {
             return obj["token"].toString()
         }
         else{
-            throw Exception("неверный апи ключ")
+            print("--- Не удалось получить ТОКЕН")
+            return ""
         }
-
     }
 
     fun getMachines(token: String): MutableMap<String, Map<String, String>> {
@@ -72,43 +72,26 @@ class NetAngelsInteraction {
         return response.statusCode==200
     }
 
-    fun getVNCConsoleData(token: String, id: String): Map<String, String> {
-        val response: Response = khttp.post(
-            url = "https://api-ms.netangels.ru/api/v1/cloud/vms/$id/vnc/",
-            headers = mapOf("Authorization" to "Bearer $token")
-        )
-        val obj =response.jsonObject
-        print(response.toString()+" "+ obj)
-        if (response.statusCode == 200) {
-            return mapOf(
-                "host" to obj["host"].toString(),
-                "password" to obj["password"].toString(),
-                "port" to obj["port"].toString(),
-                "wsport" to obj["wsport"].toString()
-            )
-        }
-        throw Exception("НЕ УДАЛОСЬ ПОЛУЧИТЬ ДАННЫЙ ДЛЯ VNC")
-    }
 
-    fun changePassword(token:String, id:String, password:String): Boolean {
+    private fun changePassword(token:String, id:String, password:String): Boolean {
         val response: Response = khttp.post(
             url = "https://api-ms.netangels.ru/api/v1/cloud/vms/$id/change-password/",
             headers = mapOf("Authorization" to "Bearer $token"),
             json = mapOf("password" to password)
         )
         val obj =response.jsonObject
-        print(response.toString()+" "+ obj)
+        print("$response $obj")
         return response.statusCode == 200
     }
 
     fun getLoginAndPassword(token: String, id: String): Map<String, String> {
-        val password = "dfgE3HKJ8c0DFj99d"
+        val password = "dfgE3HKJ8c0DFj99d" // may edit
         if (changePassword(token, id, password)) {
             return mapOf(
                 "login" to "root",
                 "password" to password
             )
         }
-        throw Exception("НЕ ПОЛУЧИЛОСЬ ПОЛУЧИТЬ ПАРОЛЬ")
+        throw Exception("НЕ ПОЛУЧИЛОСЬ ПОЛУЧИТЬ ЛОГИН И ПАРОЛЬ")
     }
 }
