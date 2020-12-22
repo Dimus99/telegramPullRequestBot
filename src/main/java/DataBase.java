@@ -52,7 +52,7 @@ public class DataBase {
     // По названию и так понятен функционал
     public String getTokenById(String id) throws SQLException {
 
-        ResultSet resSet = null;
+        ResultSet resSet;
         String res = null;
 
         String query =
@@ -65,6 +65,7 @@ public class DataBase {
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
+            return "";
         }
 
         while (Objects.requireNonNull(resSet).next()) {
