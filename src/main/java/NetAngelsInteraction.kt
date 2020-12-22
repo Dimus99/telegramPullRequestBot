@@ -56,7 +56,7 @@ class NetAngelsInteraction {
             url = "https://api-ms.netangels.ru/api/v1/cloud/vms/$id/start/",
             headers = mapOf("Authorization" to "Bearer $token")
         )
-        val starting = (response.jsonObject["state"] as JSONObject)["Starting"]
+        val starting = response.jsonObject["state"]
         print("$id запуск= $starting")
         return response.statusCode==200
     }
@@ -96,6 +96,7 @@ class NetAngelsInteraction {
                 "password" to password
             )
         }
+        print(response.jsonObject)
         throw Exception("НЕ ПОЛУЧИЛОСЬ ПОЛУЧИТЬ ЛОГИН И ПАРОЛЬ")
     }
 }
