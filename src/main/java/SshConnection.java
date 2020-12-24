@@ -1,6 +1,4 @@
 import com.jcraft.jsch.*;
-import com.sun.source.tree.TryTree;
-import org.apache.commons.compress.*;
 
 
 import java.io.*;
@@ -95,10 +93,10 @@ public class SshConnection {
 
 
         String localFile = dir+".tar.gz";
-
+        executeCommand("mkdir " + remoteDir);
         channelSftp.put(localFile, remoteDir);
         channelSftp.exit();
-        String unzipCommand = "tar -xf " + remoteDir + dir.getName()+".tar.gz" + " -C "+remoteDir;
+        String unzipCommand = "tar -xf " + remoteDir + dir.getName()+".tar.gz" + " -C " + remoteDir;
         System.out.println(unzipCommand);
         executeCommand(unzipCommand);
         executeCommand("cd " + remoteDir + " && rm " + dir.getName()+".tar.gz");
