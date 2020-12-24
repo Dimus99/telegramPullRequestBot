@@ -1,8 +1,9 @@
 import com.jcraft.jsch.*;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.IOException;
+import com.sun.source.tree.TryTree;
+import org.apache.commons.compress.*;
+
+
+import java.io.*;
 
 public class SshConnection {
     private String user;
@@ -19,6 +20,13 @@ public class SshConnection {
 
     private static final String STRICT_HOSTKEY_CHECKIN_KEY = "StrictHostKeyChecking";
     private static final String STRICT_HOSTKEY_CHECKIN_VALUE = "no";
+
+
+    private ChannelSftp setupJsch() throws JSchException {
+
+        return (ChannelSftp) session.openChannel("sftp");
+    }
+
 
     public  SshConnection(String user, String password, String host, Integer port) throws JSchException {
         this.user = user;
@@ -73,6 +81,30 @@ public class SshConnection {
 
         return outputBuffer.toString();
     }
+
+
+
+    public void sendToServer(File dir, String remoteDir) throws IOException, JSchException, SftpException {
+
+        String command = "tar -cvf "+dir+".tar.gz -C "+dir+" *";
+        Process process = Runtime.getRuntime().exec(command);
+        System.out.println("ZIPPED");
+
+        ChannelSftp channelSftp = setupJsch();
+        channelSftp.connect();
+
+
+        String localFile = dir+".tar.gz";
+
+        channelSftp.put(localFile, remoteDir);
+        channelSftp.exit();
+        String unzipCommand = "tar -xf " + remoteDir + dir.getName()+".tar.gz" + " -C "+remoteDir;
+        System.out.println(unzipCommand);
+        executeCommand(unzipCommand);
+        executeCommand("cd " + remoteDir + " && rm " + dir.getName()+".tar.gz");
+    }
+
+
 
 
 
