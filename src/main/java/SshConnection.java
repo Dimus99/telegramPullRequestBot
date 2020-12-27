@@ -48,22 +48,30 @@ public class SshConnection {
 
     public String executeCommand(String command)
     {
+        return executeCommand(command, true);
+    }
+
+    public String executeCommand(String command, Boolean isWrite)
+    {
         StringBuilder outputBuffer = new StringBuilder();
 
         try
         {
             Channel channel = session.openChannel("exec");
             ((ChannelExec)channel).setCommand(command);
-            InputStream commandOutput = channel.getInputStream();
-            channel.connect();
-            int readByte = commandOutput.read();
 
-            while(readByte != 0xffffffff)
-            {
-                outputBuffer.append((char)readByte);
-                readByte = commandOutput.read();
+                InputStream commandOutput = channel.getInputStream();
+                channel.connect();
+                System.out.println("START WRITE");
+            if (isWrite) {
+                int readByte = commandOutput.read();
+
+                while (readByte != 0xffffffff) {
+                    outputBuffer.append((char) readByte);
+                    readByte = commandOutput.read();
+                }
             }
-
+            System.out.println("STOP WRITE");
             channel.disconnect();
         }
         catch(IOException ioX)
@@ -99,12 +107,6 @@ public class SshConnection {
         String unzipCommand = "tar -xf " + remoteDir + dir.getName()+".tar.gz" + " -C " + remoteDir;
         System.out.println(unzipCommand);
         executeCommand(unzipCommand);
-        executeCommand("cd " + remoteDir + " && rm " + dir.getName()+".tar.gz");
+        executeCommand("cd " + remoteDir + " && rm " + dir.getName()+".tar.gz", false);
     }
-
-
-
-
-
-
 }

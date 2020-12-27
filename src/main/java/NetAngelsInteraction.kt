@@ -86,7 +86,7 @@ class NetAngelsInteraction {
         return response
     }
 
-    fun getLoginAndPassword(token: String, id: String): Map<String, String> {
+    fun getLoginAndPassword(token: String, id: String): Map<String, String>? {
         val password = "dfgE3HKJ8c0DFj99d" // may edit
         val response = changePassword(token, id, password)
         if (response.statusCode == 200) {
@@ -97,6 +97,6 @@ class NetAngelsInteraction {
             )
         }
         print(response.jsonObject)
-        throw Exception("НЕ ПОЛУЧИЛОСЬ ПОЛУЧИТЬ ЛОГИН И ПАРОЛЬ")
+        return null
     }
 }

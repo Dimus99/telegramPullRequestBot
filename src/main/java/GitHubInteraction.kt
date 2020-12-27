@@ -3,11 +3,11 @@ import java.io.IOException
 
 
 class GitHubInteraction {
-    fun downloadPullRequest(urlPullRequest:String): Boolean {
+    fun downloadPullRequest(urlPullRequest:String): String? {
         //разделяем ссылку pull request на ссылку на проект и номер пулл реквеста
         val urlSplit = urlPullRequest.split("/")
         if (urlSplit.count() != 7 || urlSplit[0] != "https:" || urlSplit[2] != "github.com")
-            return false
+            return null
         val urlProject = urlSplit.take(5).joinToString(separator = "/")
         val pullNumber = urlSplit[6]
         var directoryForGitProject = "./gitCopies"
@@ -25,12 +25,14 @@ class GitHubInteraction {
                 proc.destroy()
             } catch (e: IOException) {
                 e.printStackTrace()
+                return null
             } catch (e: InterruptedException) {
                 e.printStackTrace()
+                return null
             }
             directoryForGitProject += "/${urlSplit[3]}_${urlSplit[6]}"
         }
-        return true
+        return "${urlSplit[3]}_${urlSplit[6]}"
         // сделать так, чтобы можно было по ссылке получить проект / готово
         // потом этот проект можно будет отправить на виртуальную машину
     }
