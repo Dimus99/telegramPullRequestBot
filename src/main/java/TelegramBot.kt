@@ -63,8 +63,8 @@ class TelegramBot(private val dataBase:DataBase){
                                         chatId = update.message!!.chat.id,
                                         text = "Запустить или выключить?",
                                         replyMarkup = getInlineKeyboard(
-                                            listOf("Запустить", "Выключить"),
-                                            listOf("запустить", "выключить")
+                                            listOf("Запустить", "Выключить", "Список VDS"),
+                                            listOf("запустить", "выключить", "список")
                                         )
                                     )
                                 }
@@ -123,8 +123,21 @@ class TelegramBot(private val dataBase:DataBase){
     private fun manageVDS(bot: Bot, update: Update) {
         val request = update.callbackQuery!!.data
 
-        //val message = if (request == "запустить") "Запускаю" else "Выключаю"
         val vms = getMachines(bot, update.callbackQuery!!.message!!.chat.id)
+        if (request == "список") {
+
+            if (vms == null || vms.count() == 0)
+                bot.sendMessage(
+                    chatId = update.callbackQuery!!.message!!.chat.id, text = "упс, у вас нет ВМ"
+                )
+            else
+                bot.sendMessage(
+                    chatId = update.callbackQuery!!.message!!.chat.id, text = "Вот ваши ВМ:",
+                    replyMarkup = getKeyboardVDS(vms, request)
+                )
+            users[update.callbackQuery!!.message!!.chat.id.toInt()]!!.position = UserPosition.Default
+            return
+        }
         if (vms != null) {
             val neededVMS = vms.filter { x ->
                 x.value["active"] == if (request == "выключить") "Active" else "Stopped"
