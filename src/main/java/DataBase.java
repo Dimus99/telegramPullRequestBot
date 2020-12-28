@@ -49,12 +49,10 @@ public class DataBase {
         System.out.println("data added");
     }
 
-    // По названию и так понятен функционал
     public String getTokenById(String id) throws SQLException {
 
         ResultSet resSet;
         String res = null;
-
         String query =
                 "SELECT token FROM " + databaseName + " WHERE id = \"" + id + "\";";
 
@@ -71,7 +69,6 @@ public class DataBase {
         while (Objects.requireNonNull(resSet).next()) {
             res = resSet.getString("token");
         }
-
         return res;
     }
 }

@@ -4,13 +4,7 @@ import com.jcraft.jsch.*;
 import java.io.*;
 
 public class SshConnection {
-    private String user;
-    private String password;
-    private String host;
-    private Integer port;
-
-
-    private Session session;
+    private final Session session;
     private PrintStream ps;
     private InputStream input;
     private OutputStream ops;
@@ -27,10 +21,6 @@ public class SshConnection {
 
 
     public  SshConnection(String user, String password, String host, Integer port) throws JSchException {
-        this.user = user;
-        this.password = password;
-        this.host = host;
-        this.port = port;
 
         final JSch connection = new JSch();
 

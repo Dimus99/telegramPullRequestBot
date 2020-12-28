@@ -11,12 +11,9 @@ class GitHubInteraction {
         val urlProject = urlSplit.take(5).joinToString(separator = "/")
         val pullNumber = urlSplit[6]
         var directoryForGitProject = "./gitCopies"
-        val command1 = "git clone $urlProject ${urlSplit[3]}_${urlSplit[6]}"
+        val command1 = "git clone $urlProject ${urlSplit[4]}_${urlSplit[6]}"
         val command2 = "git pull origin pull/$pullNumber/head"
         //далее пишем команды в консоль
-        // возможно стоит исправить этот костыль с изменением directoryForGitProject
-        // этот костыль связан с неудобством нормально создать директорию
-        // надо добавить больше проверок на корректность ссылки
         for (command in listOf(command1, command2)) {
             try {
                 println("команда$command")
@@ -30,10 +27,8 @@ class GitHubInteraction {
                 e.printStackTrace()
                 return null
             }
-            directoryForGitProject += "/${urlSplit[3]}_${urlSplit[6]}"
+            directoryForGitProject += "/${urlSplit[4]}_${urlSplit[6]}"
         }
-        return "${urlSplit[3]}_${urlSplit[6]}"
-        // сделать так, чтобы можно было по ссылке получить проект / готово
-        // потом этот проект можно будет отправить на виртуальную машину
+        return "${urlSplit[4]}_${urlSplit[6]}"
     }
 }

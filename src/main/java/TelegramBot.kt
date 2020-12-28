@@ -97,11 +97,6 @@ class TelegramBot(private val dataBase:DataBase) {
                                 text = "нажмите на кнопку, или, для выхода нажмите /start"
                             )
                         UserPosition.SSHAction -> doSSHAction(bot, update)
-
-                        else -> throw Exception(
-                            "Лишняя ветвь when, что-то пошло не так," +
-                                    users[update.message!!.chat.id.toInt()]!!.position
-                        )
                     }
                 }
                 callbackQuery { bot, update ->
