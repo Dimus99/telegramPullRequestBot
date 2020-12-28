@@ -1,11 +1,12 @@
 import khttp.responses.Response
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.*
+
 // api https://api.netangels.ru/modules/gateway_api.api.cloud.vms/#_1
 
 
 class NetAngelsInteraction {
-
     fun getToken(apiKey:String): String {
         val response : Response = khttp.post(
             url = "https://panel.netangels.ru/api/gateway/token/",
@@ -87,7 +88,7 @@ class NetAngelsInteraction {
     }
 
     fun getLoginAndPassword(token: String, id: String): Map<String, String>? {
-        val password = "dfgE3HKJ8c0DFj99d" // may edit
+        val password = getRandomString(12) + "1A"
         val response = changePassword(token, id, password)
         if (response.statusCode == 200) {
             return mapOf(
@@ -98,5 +99,12 @@ class NetAngelsInteraction {
         }
         print(response.jsonObject)
         return null
+    }
+
+    fun getRandomString(length: Int) : String {
+        val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
+        return (1..length)
+            .map { allowedChars[Random().nextInt(allowedChars.size)] }
+            .joinToString("")
     }
 }
