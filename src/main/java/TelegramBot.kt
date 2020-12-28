@@ -4,15 +4,17 @@ import me.ivmg.telegram.dispatch
 import me.ivmg.telegram.dispatcher.callbackQuery
 import me.ivmg.telegram.dispatcher.text
 import me.ivmg.telegram.entities.*
+import java.io.File
 import java.lang.Exception
+import kotlin.collections.*
 
 
-class TelegramBot(private val dataBase:DataBase){
-    enum class UserPosition{
-        Default, Request, ApiKey, ChoseVDSForRequest, ManageVDS, ManageActionVDS
+class TelegramBot(private val dataBase:DataBase) {
+    enum class UserPosition {
+        Default, Request, ApiKey, ChoseVDSForRequest, ManageVDS, ManageActionVDS, SSH, SSHAction
     }
 
-    private val usersPositions = mutableMapOf<Int, UserPosition>()
+    private val users = mutableMapOf<Int, User>()
 
     fun start() {
         val bot = bot {
@@ -22,18 +24,20 @@ class TelegramBot(private val dataBase:DataBase){
                 KeyboardButton("/request"),
                 KeyboardButton("/start"),
                 KeyboardButton("/setApiKey"),
-                KeyboardButton(("/manageVDS"))
+                KeyboardButton("/manageVDS"),
+                KeyboardButton("/ssh")
             )
             dispatch {
                 text { bot, update ->
                     println(update)
                     val text = update.message?.text ?: "Error"
                     val args = text.split(" ")
-                    if (!usersPositions.containsKey(update.message!!.chat.id.toInt()))
-                        usersPositions[update.message!!.chat.id.toInt()] = UserPosition.Default
+                    if (!users.containsKey(update.message!!.chat.id.toInt()))
+                        users[update.message!!.chat.id.toInt()] = User()
+
                     if (text[0] == '/')
-                        usersPositions[update.message!!.chat.id.toInt()] = UserPosition.Default
-                    when (usersPositions[update.message!!.chat.id.toInt()]) {
+                        users[update.message!!.chat.id.toInt()]!!.position = UserPosition.Default
+                    when (users[update.message!!.chat.id.toInt()]!!.position) {
                         UserPosition.Default ->
                             when (args[0]) {
                                 "/start" -> bot.sendMessage(
@@ -42,29 +46,42 @@ class TelegramBot(private val dataBase:DataBase){
                                     replyMarkup = startKeyboard
                                 )
                                 "/request" -> {
-                                    usersPositions[update.message!!.chat.id.toInt()] = UserPosition.Request
+                                    users[update.message!!.chat.id.toInt()]!!.position = UserPosition.Request
                                     bot.sendMessage(
                                         chatId = update.message!!.chat.id,
                                         text = "Отправьте следующим сообщением ссылку на pull Request"
                                     )
                                 }
                                 "/setApiKey" -> {
-                                    usersPositions[update.message!!.chat.id.toInt()] = UserPosition.ApiKey
+                                    users[update.message!!.chat.id.toInt()]!!.position = UserPosition.ApiKey
                                     bot.sendMessage(
                                         chatId = update.message!!.chat.id,
                                         text = "Отправьте следующим сообщением ваш Api_key"
                                     )
                                 }
                                 "/manageVDS" -> {
-                                    usersPositions[update.message!!.chat.id.toInt()] = UserPosition.ManageVDS
+                                    users[update.message!!.chat.id.toInt()]!!.position = UserPosition.ManageVDS
                                     bot.sendMessage(
                                         chatId = update.message!!.chat.id,
                                         text = "Запустить или выключить?",
                                         replyMarkup = getInlineKeyboard(
-                                            listOf("Запустить", "Выключить"),
-                                            listOf("запустить", "выключить")
+                                            listOf("Запустить", "Выключить", "Список VDS"),
+                                            listOf("запустить", "выключить", "список")
                                         )
                                     )
+                                }
+                                "/ssh" -> {
+                                    val vms = getMachines(bot, update.message!!.chat.id)
+                                    if (vms != null) {
+                                        bot.sendMessage(
+                                            chatId = update.message!!.chat.id,
+                                            text = "выберите ВМ, к которой хотите подключиться",
+                                            replyMarkup = getKeyboardVDS(
+                                                vms, "ssh"
+                                            )
+                                        )
+                                    }
+                                    users[update.message!!.chat.id.toInt()]!!.position = UserPosition.SSH
                                 }
                                 else -> bot.sendMessage(
                                     chatId = update.message!!.chat.id,
@@ -73,26 +90,29 @@ class TelegramBot(private val dataBase:DataBase){
                             }
                         UserPosition.Request -> addRequest(args, bot, update, gitActions)
                         UserPosition.ApiKey -> setApiKey(args, bot, update)
-                        UserPosition.ChoseVDSForRequest, UserPosition.ManageActionVDS, UserPosition.ManageVDS ->
+                        UserPosition.SSH, UserPosition.ChoseVDSForRequest,
+                        UserPosition.ManageActionVDS, UserPosition.ManageVDS ->
                             bot.sendMessage(
-                            chatId = update.message!!.chat.id,
-                            text = "нажмите на кнопку, или, для выхода нажмите /start"
-                        )
-
-                        else -> throw Exception(
-                            "Лишняя ветвь when, что-то пошло не так," +
-                                    usersPositions[update.message!!.chat.id.toInt()]
-                        )
+                                chatId = update.message!!.chat.id,
+                                text = "нажмите на кнопку, или, для выхода нажмите /start"
+                            )
+                        UserPosition.SSHAction -> doSSHAction(bot, update)
                     }
                 }
                 callbackQuery { bot, update ->
                     print(update)
 
-                    when (usersPositions[update.callbackQuery!!.message!!.chat.id.toInt()]){
+                    when (users[update.callbackQuery!!.message!!.chat.id.toInt()]!!.position) {
                         UserPosition.ChoseVDSForRequest -> uploadRequest(bot, update)
                         UserPosition.ManageVDS -> manageVDS(bot, update)
                         UserPosition.ManageActionVDS -> manageActionVDS(bot, update)
-                        else -> {bot.sendMessage(chatId = update.callbackQuery!!.message!!.chat.id, text = "Заново сделайте запрос")}
+                        UserPosition.SSH -> sshConsoleBot(bot, update)
+                        else -> {
+                            bot.sendMessage(
+                                chatId = update.callbackQuery!!.message!!.chat.id,
+                                text = "Заново сделайте запрос"
+                            )
+                        }
                     }
                 }
             }
@@ -100,12 +120,55 @@ class TelegramBot(private val dataBase:DataBase){
         bot.startPolling()
     }
 
+    private fun doSSHAction(bot: Bot, update: Update) {
+        val message = update.message!!.text
+        val chatId = update.message!!.chat.id
+        val ssh = users[chatId.toInt()]!!.sshConnection
+        var result = "что-то пошло не так"
+
+        try {
+            result = ssh.executeCommand(message)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        bot.sendMessage(chatId, result)
+    }
+
+    private fun sshConsoleBot(bot: Bot, update: Update) {
+        val request = update.callbackQuery!!.data
+        val vmId = request.split(" ")[0]
+        val status = request.split(" ")[1]
+        if (status != "Active")
+        {
+            bot.sendMessage(
+                chatId = update.callbackQuery!!.message!!.chat.id,
+                text = "cначасла включите вм в /manageVDS"
+            )
+            return
+        }
+        val apiKey = getApiKey(update.callbackQuery!!.message!!.chat.id.toString())
+        val token = NetAngelsInteraction().getToken(apiKey)
+        val sshData = NetAngelsInteraction().getLoginAndPassword(token, vmId)
+        bot.sendMessage(
+            chatId = update.callbackQuery!!.message!!.chat.id,
+            text = "я поменял данные для подключения, если что они вот: $sshData"
+        )
+        val ssh = SshConnection(sshData?.get("login"), sshData?.get("password"), sshData?.get("host"), 22)
+        users[update.callbackQuery!!.message!!.chat.id.toInt()]!!.sshConnection = ssh
+        bot.sendMessage(
+            chatId = update.callbackQuery!!.message!!.chat.id,
+            text = "Все последующие сообхения, которые ты отправишь, поступят на этот сервер" +
+                    vmId + "для завершения, нажми /start"
+        )
+        users[update.callbackQuery!!.message!!.chat.id.toInt()]!!.position = UserPosition.SSHAction
+
+    }
+
     private fun manageActionVDS(bot: Bot, update: Update) {
         val request = update.callbackQuery!!.data.split(" ")
-        if (request.count() != 3)
-        {
+        if (request.count() != 3) {
             bot.sendMessage(chatId = update.callbackQuery!!.message!!.chat.id, text = "заного нажмите /manageVDS")
-            usersPositions[update.callbackQuery!!.message!!.chat.id.toInt()] = UserPosition.Default
+            users[update.callbackQuery!!.message!!.chat.id.toInt()]!!.position = UserPosition.Default
             return
         }
         val token = NetAngelsInteraction().getToken(getApiKey(update.callbackQuery!!.message!!.chat.id.toString()))
@@ -113,16 +176,31 @@ class TelegramBot(private val dataBase:DataBase){
             NetAngelsInteraction().startVM(token, request[0])
         else
             NetAngelsInteraction().stopVM(token, request[0])
-        bot.sendMessage(chatId = update.callbackQuery!!.message!!.chat.id,
-            text = "выполнил команду \"$request\"")
-        usersPositions[update.callbackQuery!!.message!!.chat.id.toInt()] = UserPosition.Default
+        bot.sendMessage(
+            chatId = update.callbackQuery!!.message!!.chat.id,
+            text = "выполнил команду \"$request\""
+        )
+        users[update.callbackQuery!!.message!!.chat.id.toInt()]!!.position = UserPosition.Default
     }
 
     private fun manageVDS(bot: Bot, update: Update) {
         val request = update.callbackQuery!!.data
 
-        //val message = if (request == "запустить") "Запускаю" else "Выключаю"
         val vms = getMachines(bot, update.callbackQuery!!.message!!.chat.id)
+        if (request == "список") {
+
+            if (vms == null || vms.count() == 0)
+                bot.sendMessage(
+                    chatId = update.callbackQuery!!.message!!.chat.id, text = "упс, у вас нет ВМ"
+                )
+            else
+                bot.sendMessage(
+                    chatId = update.callbackQuery!!.message!!.chat.id, text = "Вот ваши ВМ:",
+                    replyMarkup = getKeyboardVDS(vms, request)
+                )
+            users[update.callbackQuery!!.message!!.chat.id.toInt()]!!.position = UserPosition.Default
+            return
+        }
         if (vms != null) {
             val neededVMS = vms.filter { x ->
                 x.value["active"] == if (request == "выключить") "Active" else "Stopped"
@@ -137,7 +215,7 @@ class TelegramBot(private val dataBase:DataBase){
                 chatId = update.callbackQuery!!.message!!.chat.id, text = "Выберите вм",
                 replyMarkup = getKeyboardVDS(neededVMS, request)
             )
-            usersPositions[update.callbackQuery!!.message!!.chat.id.toInt()] = UserPosition.ManageActionVDS
+            users[update.callbackQuery!!.message!!.chat.id.toInt()]!!.position = UserPosition.ManageActionVDS
         }
     }
 
@@ -158,7 +236,7 @@ class TelegramBot(private val dataBase:DataBase){
             bot.sendMessage(chatId = update.message!!.chat.id, text = "Ошибка с установкой токена")
             e.printStackTrace()
         }
-        usersPositions[update.message!!.chat.id.toInt()] = UserPosition.Default
+        users[update.message!!.chat.id.toInt()]!!.position = UserPosition.Default
     }
 
     private fun addRequest(
@@ -170,10 +248,15 @@ class TelegramBot(private val dataBase:DataBase){
         bot.sendMessage(chatId = update.message!!.chat.id, text = "Скачиваем ваш pull request, ожидайте...")
         val pullRequest = args[0]
         try {
-            if (!gitActions.downloadPullRequest(pullRequest)) {
-                bot.sendMessage(chatId = update.message!!.chat.id, text = "Ссылка не валидная, отправьте верную, или нажмите /start")
+            val gitDir = gitActions.downloadPullRequest(pullRequest)
+            if (gitDir == null) {
+                bot.sendMessage(
+                    chatId = update.message!!.chat.id,
+                    text = "Ссылка не валидная, отправьте верную, или нажмите /start"
+                )
                 return
             }
+            users[update.message!!.chat.id.toInt()]!!.savedFile = gitDir
             val machines = getMachines(bot, update.message!!.chat.id)
             if (machines != null) {
                 val keyboard = getKeyboardVDS(machines, "")
@@ -182,14 +265,14 @@ class TelegramBot(private val dataBase:DataBase){
                     text = "Выберете сервер для загрузки реквеста \n(я поменяю пароль и отправлю вам данные для подключения)",
                     replyMarkup = keyboard
                 )
-                usersPositions[update.message!!.chat.id.toInt()] = UserPosition.ChoseVDSForRequest
+                users[update.message!!.chat.id.toInt()]!!.position = UserPosition.ChoseVDSForRequest
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun getKeyboardVDS(machines: Map<String, Map<String, String>>, arg:String): ReplyMarkup {
+    private fun getKeyboardVDS(machines: Map<String, Map<String, String>>, arg: String): ReplyMarkup {
 
         val machinesList: MutableList<String> = mutableListOf()
         val ids: MutableList<String> = mutableListOf()
@@ -205,13 +288,11 @@ class TelegramBot(private val dataBase:DataBase){
         return getInlineKeyboard(machinesList, ids)
     }
 
-    private fun addToDataBase(id: String, token: String)
-    {
+    private fun addToDataBase(id: String, token: String) {
         dataBase.addData(id, token)
     }
 
-    private fun getApiKey(id: String): String
-    {
+    private fun getApiKey(id: String): String {
         return dataBase.getTokenById(id)
     }
 
@@ -229,48 +310,75 @@ class TelegramBot(private val dataBase:DataBase){
                 chatId = update.callbackQuery!!.message!!.chat.id,
                 text = "сначала включите VM в /manageVDS"
             )
-            //usersPositions[update.callbackQuery!!.message!!.chat.id.toInt()] = UserPosition.Default
             return
         }
 
         val vdsData = NetAngelsInteraction().getLoginAndPassword(token, vdsId)
-        //вот тут вызов функции, которая загрузит проект
+        if (vdsData == null) {
+            bot.sendMessage(
+                chatId = update.callbackQuery!!.message!!.chat.id,
+                text = "Какая-то ошибка с получаением пароля"
+            )
+            return
+        }
+        print(vdsData)
+        val ssh = SshConnection(vdsData["login"], vdsData["password"], vdsData["host"], 22)
+        val nameOfFile = users[update.callbackQuery!!.message!!.chat.id.toInt()]!!.savedFile
+        bot.sendMessage(chatId = update.callbackQuery!!.message!!.chat.id, text = "Ожидайте...")
 
-        bot.sendMessage(chatId = update.callbackQuery!!.message!!.chat.id, text =
-        "Я поменял пароль на этой VDS $vdsId , вот данные для подключения: $vdsData")
-        usersPositions[update.callbackQuery!!.message!!.chat.id.toInt()] = UserPosition.Default
+        ssh.sendToServer(
+            File(
+                "gitCopies/" +
+                        nameOfFile
+            ), "$nameOfFile/"
+        )
+        ssh.executeCommand("cd $nameOfFile && chmod ugo+x start.sh")
+        ssh.executeCommand("cd $nameOfFile && ./start.sh", false)
+
+
+
+        bot.sendMessage(
+            chatId = update.callbackQuery!!.message!!.chat.id, text =
+            "Я поменял пароль на этой VDS $vdsId , вот данные для подключения: $vdsData"
+        )
+        users[update.callbackQuery!!.message!!.chat.id.toInt()]!!.position = UserPosition.Default
     }
 
-    private fun getMachines(bot:Bot, chatID:Long): MutableMap<String, Map<String, String>>? {
+    private fun getMachines(bot: Bot, chatID: Long): MutableMap<String, Map<String, String>>? {
 
         val apiKey = getApiKey(chatID.toString())
-        if (apiKey.isEmpty())
-        {
+        if (apiKey.isEmpty()) {
             bot.sendMessage(chatId = chatID, text = "Ваш apiKey невалидный/вы его не загрузили")
             bot.sendMessage(chatId = chatID, text = "Для загрузки воспользуйтесь /setApiKey")
             return null
-        }
-        else {
+        } else {
             val token = NetAngelsInteraction().getToken(apiKey) // may edit
             if (token.isEmpty()) {
                 bot.sendMessage(
                     chatId = chatID,
                     text = "У вас не валидный ApiKey, установите валидный ключ от netangels api в /setApiKey"
                 )
-                usersPositions[chatID.toInt()] = UserPosition.Default
+                users[chatID.toInt()]!!.position = UserPosition.Default
                 return null
             }
             return NetAngelsInteraction().getMachines(token)
         }
     }
 
-    private fun getInlineKeyboard(list:List<String>, ids:List<String>): InlineKeyboardMarkup {
-        val rows : MutableList<MutableList<InlineKeyboardButton>> = mutableListOf()
+    private fun getInlineKeyboard(list: List<String>, ids: List<String>): InlineKeyboardMarkup {
+        val rows: MutableList<MutableList<InlineKeyboardButton>> = mutableListOf()
         for (row in 1..list.count())
             rows.add(mutableListOf())
-        for ((numberButton, elem) in list.withIndex()){
+        for ((numberButton, elem) in list.withIndex()) {
             rows[numberButton].add(InlineKeyboardButton(text = elem, callbackData = ids[numberButton]))
         }
         return InlineKeyboardMarkup(rows)
+    }
+
+
+    class User{
+        lateinit var sshConnection: SshConnection
+        var position = UserPosition.Default
+        var savedFile = ""        
     }
 }

@@ -4,13 +4,7 @@ import com.jcraft.jsch.*;
 import java.io.*;
 
 public class SshConnection {
-    private String user;
-    private String password;
-    private String host;
-    private Integer port;
-
-
-    private Session session;
+    private final Session session;
     private PrintStream ps;
     private InputStream input;
     private OutputStream ops;
@@ -27,10 +21,6 @@ public class SshConnection {
 
 
     public  SshConnection(String user, String password, String host, Integer port) throws JSchException {
-        this.user = user;
-        this.password = password;
-        this.host = host;
-        this.port = port;
 
         final JSch connection = new JSch();
 
@@ -48,22 +38,30 @@ public class SshConnection {
 
     public String executeCommand(String command)
     {
+        return executeCommand(command, true);
+    }
+
+    public String executeCommand(String command, Boolean isWrite)
+    {
         StringBuilder outputBuffer = new StringBuilder();
 
         try
         {
             Channel channel = session.openChannel("exec");
             ((ChannelExec)channel).setCommand(command);
-            InputStream commandOutput = channel.getInputStream();
-            channel.connect();
-            int readByte = commandOutput.read();
 
-            while(readByte != 0xffffffff)
-            {
-                outputBuffer.append((char)readByte);
-                readByte = commandOutput.read();
+                InputStream commandOutput = channel.getInputStream();
+                channel.connect();
+                System.out.println("START WRITE");
+            if (isWrite) {
+                int readByte = commandOutput.read();
+
+                while (readByte != 0xffffffff) {
+                    outputBuffer.append((char) readByte);
+                    readByte = commandOutput.read();
+                }
             }
-
+            System.out.println("STOP WRITE");
             channel.disconnect();
         }
         catch(IOException ioX)
@@ -99,12 +97,6 @@ public class SshConnection {
         String unzipCommand = "tar -xf " + remoteDir + dir.getName()+".tar.gz" + " -C " + remoteDir;
         System.out.println(unzipCommand);
         executeCommand(unzipCommand);
-        executeCommand("cd " + remoteDir + " && rm " + dir.getName()+".tar.gz");
+        executeCommand("cd " + remoteDir + " && rm " + dir.getName()+".tar.gz", false);
     }
-
-
-
-
-
-
 }

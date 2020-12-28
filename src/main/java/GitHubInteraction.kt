@@ -3,20 +3,17 @@ import java.io.IOException
 
 
 class GitHubInteraction {
-    fun downloadPullRequest(urlPullRequest:String): Boolean {
+    fun downloadPullRequest(urlPullRequest:String): String? {
         //разделяем ссылку pull request на ссылку на проект и номер пулл реквеста
         val urlSplit = urlPullRequest.split("/")
         if (urlSplit.count() != 7 || urlSplit[0] != "https:" || urlSplit[2] != "github.com")
-            return false
+            return null
         val urlProject = urlSplit.take(5).joinToString(separator = "/")
         val pullNumber = urlSplit[6]
         var directoryForGitProject = "./gitCopies"
-        val command1 = "git clone $urlProject ${urlSplit[3]}_${urlSplit[6]}"
+        val command1 = "git clone $urlProject ${urlSplit[4]}_${urlSplit[6]}"
         val command2 = "git pull origin pull/$pullNumber/head"
         //далее пишем команды в консоль
-        // возможно стоит исправить этот костыль с изменением directoryForGitProject
-        // этот костыль связан с неудобством нормально создать директорию
-        // надо добавить больше проверок на корректность ссылки
         for (command in listOf(command1, command2)) {
             try {
                 println("команда$command")
@@ -25,13 +22,13 @@ class GitHubInteraction {
                 proc.destroy()
             } catch (e: IOException) {
                 e.printStackTrace()
+                return null
             } catch (e: InterruptedException) {
                 e.printStackTrace()
+                return null
             }
-            directoryForGitProject += "/${urlSplit[3]}_${urlSplit[6]}"
+            directoryForGitProject += "/${urlSplit[4]}_${urlSplit[6]}"
         }
-        return true
-        // сделать так, чтобы можно было по ссылке получить проект / готово
-        // потом этот проект можно будет отправить на виртуальную машину
+        return "${urlSplit[4]}_${urlSplit[6]}"
     }
 }
