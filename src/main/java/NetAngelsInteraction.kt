@@ -15,12 +15,11 @@ class NetAngelsInteraction {
         val obj : JSONObject = response.jsonObject
         print(obj)
         print(response)
-        if (obj.has("token")){
-            return obj["token"].toString()
-        }
-        else{
+        return if (obj.has("token")){
+            obj["token"].toString()
+        } else{
             print("--- Не удалось получить ТОКЕН")
-            return ""
+            ""
         }
     }
 
@@ -101,7 +100,7 @@ class NetAngelsInteraction {
         return null
     }
 
-    fun getRandomString(length: Int) : String {
+    private fun getRandomString(length: Int) : String {
         val allowedChars = ('A'..'Z') + ('a'..'z') + ('0'..'9')
         return (1..length)
             .map { allowedChars[Random().nextInt(allowedChars.size)] }
