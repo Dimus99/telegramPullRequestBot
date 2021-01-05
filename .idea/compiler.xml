@@ -6,6 +6,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="telegramPullRequestBot" />
         <module name="TelegramPullRequestBot" />
         <module name="telegramPullRequestBot2" />
       </profile>

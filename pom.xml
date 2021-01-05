@@ -11,6 +11,7 @@
     <properties>
         <maven.compiler.source>15</maven.compiler.source>
         <maven.compiler.target>15</maven.compiler.target>
+        <kotlin.version>1.4.21</kotlin.version>
     </properties>
     <repositories>
         <repository>
@@ -18,11 +19,23 @@
             <url>https://jitpack.io</url>
         </repository>
     </repositories>
+
+
     <dependencies>
+        <dependency>
+            <groupId>com.github.jkcclemens</groupId>
+            <artifactId>khttp</artifactId>
+            <version>0.1.0</version>
+        </dependency>
         <dependency>
             <groupId>io.github.kotlin-telegram-bot.kotlin-telegram-bot</groupId>
             <artifactId>telegram</artifactId>
             <version>4.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.55</version>
         </dependency>
     </dependencies>
 
